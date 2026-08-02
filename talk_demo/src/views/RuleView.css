@@ -1,0 +1,101 @@
+/* 全螢幕深色外層 (左右留白區域) */
+.rule-page-wrapper {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0;
+  padding: 0;
+  background-color: #121214;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 中間主卡片容器 (模擬手機螢幕) */
+.main-card-container {
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  background-color: #BFB3EB;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 中間滾動內容區 */
+.content-area {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+/* 美化滾動條 */
+.content-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.content-area::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.content-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 條款容器 */
+.rule-container {
+  width: 100%;
+  max-width: 520px;
+}
+
+/* 卡片通用樣式 (半透明柔和白底卡片) */
+.rule-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 24px 28px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* 首頁頂部標題卡片 */
+.header-card h2 {
+  font-size: 1.25rem;
+  color: #222;
+  line-height: 1.4;
+}
+
+.highlight-title {
+  font-size: 1.5rem;
+  color: #ff2a5f;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* 卡片內文樣式 */
+.rule-card h3 {
+  font-size: 1.2rem;
+  color: #111;
+}
+
+.rule-card p {
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+/* 清單樣式 */
+.rule-list {
+  list-style: none;
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.6;
+}
+
+.rule-bullet-list {
+  padding-left: 20px;
+  font-size: 0.95rem;
+  color: #444;
+  line-height: 1.5;
+}
+
+.warning-text {
+  color: #d92b2b !important;
+  font-weight: 500;
+}

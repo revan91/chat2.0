@@ -1,0 +1,86 @@
+/* 1. 外層深色背景 (左右留白) */
+.chat-page-wrapper {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background-color: #121214; /* 外層深色 */
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* 2. 中間卡片主容器 */
+.main-card-container {
+  width: 100%;
+  max-width: 600px; /* 卡片最大寬度 */
+  height: 100%;
+  background-color: #BFB3EB; /* 主體紫色 */
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* 聊天視窗內容區 */
+#chat-box {
+  background-color: #f0f2f5;
+  color: #333;
+}
+
+/* 系統訊息風格 */
+.system-msg {
+  align-self: center;
+  background: #e1e3e8;
+  color: #555;
+  padding: 6px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  margin: 5px 0;
+}
+
+/* 訊息對話框風格 */
+.message {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  word-wrap: break-word;
+  font-size: 0.95rem;
+}
+
+.message .sender-name {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-bottom: 2px;
+}
+
+/* 自己發送的訊息 (靠右，藍色背景) */
+.my-message {
+  margin-left: auto !important;  /* 🔥 用 margin-left: auto 強制推到最右邊 */
+  align-self: flex-end !important;
+  background-color: #0d6efd !important; /* Bootstrap 主藍色 */
+  color: #ffffff !important;
+  border-radius: 18px 18px 0px 18px !important;
+}
+
+/* 對方發送的訊息 (強制靠左，灰色背景) */
+.other-message {
+  margin-right: auto !important; /* 🔥 用 margin-right: auto 強制推到最左邊 */
+  align-self: flex-start !important;
+  background-color: #e9ecef !important; /* 灰色背景 */
+  color: #212529 !important;
+  border-radius: 18px 18px 18px 0px !important;
+}
+/* 輸入框底部自訂微調 */
+.custom-input-group {
+  background-color: #ffffff;
+  border-top: 1px solid #dee2e6;
+}
+
+/* 自訂 Bootstrap 顏色按鈕 */
+.btn-custom-cyan {
+  background-color: #35B4CE;
+  border-color: #35B4CE;
+  color: white;
+}
+
+.btn-custom-cyan:hover {
+  background-color: #2ba0b8;
+  border-color: #2ba0b8;
+  color: white;
+}
