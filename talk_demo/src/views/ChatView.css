@@ -3,7 +3,8 @@
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background-color: #121214; /* 外層深色 */
+  background-color: #121214;
+  /* 外層深色 */
   overflow: hidden;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
@@ -11,9 +12,11 @@
 /* 2. 中間卡片主容器 */
 .main-card-container {
   width: 100%;
-  max-width: 600px; /* 卡片最大寬度 */
+  max-width: 600px;
+  /* 卡片最大寬度 */
   height: 100%;
-  background-color: #BFB3EB; /* 主體紫色 */
+  background-color: #BFB3EB;
+  /* 主體紫色 */
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
 }
 
@@ -51,21 +54,26 @@
 
 /* 自己發送的訊息 (靠右，藍色背景) */
 .my-message {
-  margin-left: auto !important;  /* 🔥 用 margin-left: auto 強制推到最右邊 */
+  margin-left: auto !important;
+  /* 🔥 用 margin-left: auto 強制推到最右邊 */
   align-self: flex-end !important;
-  background-color: #0d6efd !important; /* Bootstrap 主藍色 */
+  background-color: #0d6efd !important;
+  /* Bootstrap 主藍色 */
   color: #ffffff !important;
   border-radius: 18px 18px 0px 18px !important;
 }
 
 /* 對方發送的訊息 (強制靠左，灰色背景) */
 .other-message {
-  margin-right: auto !important; /* 🔥 用 margin-right: auto 強制推到最左邊 */
+  margin-right: auto !important;
+  /* 🔥 用 margin-right: auto 強制推到最左邊 */
   align-self: flex-start !important;
-  background-color: #e9ecef !important; /* 灰色背景 */
+  background-color: #e9ecef !important;
+  /* 灰色背景 */
   color: #212529 !important;
   border-radius: 18px 18px 18px 0px !important;
 }
+
 /* 輸入框底部自訂微調 */
 .custom-input-group {
   background-color: #ffffff;
@@ -83,4 +91,55 @@
   background-color: #2ba0b8;
   border-color: #2ba0b8;
   color: white;
+}
+
+.secret-key-input {
+  border: 2px solid rgba(53, 180, 206, 0.9);
+  border-radius: 12px;
+  box-shadow: 0 0 0 4px rgba(53, 180, 206, 0.12);
+  background-color: #f8fbfd;
+}
+
+.secret-key-input:focus {
+  border-color: #35b4ce;
+  box-shadow: 0 0 0 6px rgba(53, 180, 206, 0.15);
+  outline: none;
+}
+
+
+.match-card {
+  max-width: 360px;
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.gender-selector {
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.gender-btn {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.gender-btn i {
+  font-size: 2.2rem;
+}
+
+.gender-btn.male i {
+  color: #0084ff;
+}
+
+.gender-btn.female i {
+  color: #ff4785;
+}
+
+.gender-btn.active {
+  border: 3px solid #35B4CE !important;
+  transform: scale(1.08);
+  box-shadow: 0 6px 15px rgba(53, 180, 206, 0.3);
 }

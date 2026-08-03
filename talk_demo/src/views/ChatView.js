@@ -5,17 +5,16 @@ import { io } from 'socket.io-client'
 export function useChat() {
   const router = useRouter()
 
-  const isMatching = ref(false)
+  const isMatching = ref(true) // 進入此頁面即開始配對
   const inRoom = ref(false)
-  const secretKey = ref('')
   const inputMessage = ref('')
   const messages = ref([])
   const msgCount = ref(0)
   const chatBoxRef = ref(null)
   
-  const mySocketId = ref('') // 🎯 專門儲存「我自己的 Socket ID」
+  const mySocketId = ref('')
 
-  // Leave Modal 狀態
+  // Modal 狀態
   const isModalOpen = ref(false)
   const leaveVerifyText = ref('')
 
@@ -30,19 +29,35 @@ export function useChat() {
       return
     }
 
+    // 取得配對條件
+    const matchType = sessionStorage.getItem('matchType') || 'gender'
+    const secretKey = sessionStorage.getItem('secretKey') || ''
+    const preferredGender = sessionStorage.getItem('preferredGender') || 'any'
+
     const socket = io()
     socketRef.value = socket
 
-    // 連線成功時，立刻儲存自己的 Socket ID
     socket.on('connect', () => {
       mySocketId.value = socket.id
-      console.log('✅ Socket 連線成功！當前我的 ID:', mySocketId.value)
+      console.log('✅ Socket 連線成功！當前 ID:', mySocketId.value)
+
+      // 發送使用者資訊、性別偏好與暗號給後端進行配對
+      socket.emit('start match', {
+        nickname,
+        gender,
+        matchType,
+        secretKey,
+        preferredGender
+      })
+
+      const statusText = matchType === 'secret' 
+        ? `尋找密語【${secretKey}】對象中，請稍候...` 
+        : '尋找對象中，請稍候...'
+
+      appendSystemMsg(statusText)
     })
 
-    socket.on('status', (msg) => appendSystemMsg(msg))
-
     socket.on('matched', (data) => {
-      isMatching.value = true
       inRoom.value = true
       msgCount.value = 0
 
@@ -53,7 +68,6 @@ export function useChat() {
     })
 
     socket.on('chat message', (data) => {
-
       msgCount.value = data.msgCount
       messages.value.push({
         type: 'chat',
@@ -66,28 +80,17 @@ export function useChat() {
 
     socket.on('partner left', () => {
       inRoom.value = false
-      appendSystemMsg('❌ 陌生人已離開聊天室。按下左下角「離開」按鈕可重新開始。')
+      appendSystemMsg('❌ 陌生人已離開聊天室。按下左下角「離開」按鈕可返回。')
     })
   })
 
   onUnmounted(() => {
     if (socketRef.value) socketRef.value.disconnect()
+    // 清除單次配對條件
+    sessionStorage.removeItem('matchType')
+    sessionStorage.removeItem('secretKey')
+    sessionStorage.removeItem('preferredGender')
   })
-
-  const startMatch = () => {
-    const nickname = localStorage.getItem('userNickname')
-    const gender = localStorage.getItem('userGender')
-
-    isMatching.value = true
-    inRoom.value = false
-    messages.value = []
-    msgCount.value = 0
-
-    if (socketRef.value) {
-      socketRef.value.emit('start match', { nickname, gender, secretKey: secretKey.value })
-    }
-    appendSystemMsg('尋找對象中，請稍候...')
-  }
 
   const sendMessage = () => {
     if (inputMessage.value.trim() && inRoom.value && socketRef.value) {
@@ -114,7 +117,7 @@ export function useChat() {
     if (socketRef.value) {
       socketRef.value.emit('leave room')
     }
-    window.location.reload()
+    router.push('/')
   }
 
   const handleReport = () => {
@@ -139,15 +142,13 @@ export function useChat() {
   return {
     isMatching,
     inRoom,
-    secretKey,
     inputMessage,
     messages,
     msgCount,
     chatBoxRef,
-    mySocketId, // 🎯 將 mySocketId 回傳給 Vue
+    mySocketId,
     isModalOpen,
     leaveVerifyText,
-    startMatch,
     sendMessage,
     openLeaveModal,
     closeLeaveModal,

@@ -1,33 +1,22 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
-
-
-
-// 2. 設定 API 路由（如果有）
-
-const path = require('path');
 
 app.get('/api/test', (req, res) => {
   res.json({ message: "API 連線成功！" });
 });
 
-// 關鍵 3：託管 Vue 打包後的靜態檔案 (dist)
-// __dirname 代表 server 資料夾，../talk_demo/dist 可以往上退一層找到 Vue 的打包結果
 app.use(express.static(path.join(__dirname, '../talk_demo/dist')));
 
-// 關鍵 4：處理 Vue Router (SPA) 的 History 模式
-// 只要不是 API 請求，其餘請求通通傳回 index.html
 app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, '../talk_demo/dist/index.html'));
 });
 
-// 關鍵 5：動態使用 Render 給予的 process.env.PORT
 const PORT = process.env.PORT || 3001;
-
 server.listen(PORT, () => {
   console.log(`✅ 伺服器已在 Port ${PORT} 啟動`);
 });
@@ -40,26 +29,80 @@ const io = new Server(server, {
 });
 
 const rooms = {};
-let waitingQueue = []; 
+// 🎯 全域單一等待池 (Waiting Pool)
+let waitingPool = [];
+
+/**
+ * 🎯 雙向屬性比對 (Double Match Logic)
+ * 判斷 userA 與 userB 是否彼此完全符合條件
+ */
+function isMatch(userA, userB) {
+  // 1. 密語配對：若為密語模式，必須暗號一致 (且不能為預設 default)
+  if (userA.matchType === 'secret' || userB.matchType === 'secret') {
+    return userA.matchType === userB.matchType && 
+           userA.secretKey !== 'default' && 
+           userA.secretKey === userB.secretKey;
+  }
+
+  // 2. 一般性別配對：檢查雙向性別偏好
+  // A 的偏好是否符合 B 的性別
+  const aSatisfiesB = (userB.preferredGender === 'any') || (userA.gender === userB.preferredGender);
+  // B 的偏好是否符合 A 的性別
+  const bSatisfiesA = (userA.preferredGender === 'any') || (userB.gender === userA.preferredGender);
+
+  return aSatisfiesB && bSatisfiesA;
+}
+
+/**
+ * 🎯 計算等待池中符合 targetUser 條件的人數
+ */
+function getMatchableCount(targetUser) {
+  return waitingPool.filter(user => user.socket.id !== targetUser.socket.id && isMatch(targetUser, user)).length;
+}
 
 io.on('connection', (socket) => {
   console.log('✅ 連線成功，使用者 Socket ID:', socket.id);
+    // 🎯 專門處理點選性別時「查詢即時排隊人數」的請求
+  socket.on('get match count', (data) => {
+    const { gender, preferredGender, matchType } = data;
 
+    const targetUser = {
+      socket: { id: socket.id },
+      gender: gender || 'male',
+      preferredGender: preferredGender || 'any',
+      matchType: matchType || 'gender',
+      secretKey: 'default'
+    };
+
+    // 計算符合該條件的人數並回傳給觸發者
+    const count = getMatchableCount(targetUser);
+    socket.emit('match count updated', { count });
+  });
+  // 🎯 觸發開始配對
   socket.on('start match', (data) => {
-    const { nickname, gender, secretKey } = data;
-    const userSecretKey = secretKey?.trim() || 'default';
-
+    const { nickname, gender, matchType, secretKey, preferredGender } = data;
+    
     socket.nickname = nickname || '陌生人';
     socket.gender = gender;
 
-    waitingQueue = waitingQueue.filter(u => u.socket.id !== socket.id);
+    const newUser = {
+      socket,
+      nickname: socket.nickname,
+      gender: gender || 'male',
+      matchType: matchType || 'gender',
+      secretKey: secretKey?.trim() || 'default',
+      preferredGender: preferredGender || 'any'
+    };
 
-    const partnerIndex = waitingQueue.findIndex(
-      u => u.secretKey === userSecretKey && u.socket.id !== socket.id
-    );
+    // 先清除可能已在池中的舊連線
+    waitingPool = waitingPool.filter(u => u.socket.id !== socket.id);
+
+    // 🎯 尋找池子裡第一個符合條件（isMatch 為 true）的對象
+    const partnerIndex = waitingPool.findIndex(candidate => isMatch(newUser, candidate));
 
     if (partnerIndex !== -1) {
-      const partner = waitingQueue.splice(partnerIndex, 1)[0];
+      // 🎉 配對成功！將對象從池中取出
+      const partner = waitingPool.splice(partnerIndex, 1)[0];
       const roomId = `room_${partner.socket.id}_${socket.id}`;
 
       rooms[roomId] = { msgCount: 0 };
@@ -69,6 +112,8 @@ io.on('connection', (socket) => {
 
       socket.roomId = roomId;
       partner.socket.roomId = roomId;
+
+      const userSecretKey = newUser.secretKey;
 
       socket.emit('matched', {
         roomId,
@@ -82,26 +127,27 @@ io.on('connection', (socket) => {
         partner: { nickname: socket.nickname, gender: socket.gender }
       });
 
-      console.log(`🎉 配對成功！房間 ID: ${roomId} (暗號: ${userSecretKey})`);
+      console.log(`🎉 配對成功！房間 ID: ${roomId} (模式: ${newUser.matchType})`);
+
     } else {
-      waitingQueue.push({
-        socket,
-        nickname: socket.nickname,
-        gender,
-        secretKey: userSecretKey
-      });
-      
+      // ⏳ 沒找到，放入等待池中
+      waitingPool.push(newUser);
+
+      // 回傳當前專屬於該使用者的符合排隊人數
+      const count = getMatchableCount(newUser);
+      socket.emit('match count updated', { count });
+
       socket.emit('status', '尋找對象中，請稍候...');
     }
   });
 
+  // 聊天訊息處理
   socket.on('chat message', (msg) => {
     const roomId = socket.roomId;
     
     if (roomId && rooms[roomId]) {
       rooms[roomId].msgCount += 1;
 
-      // ✅ 傳回 senderSocketId 供前端比對對話左右側
       io.to(roomId).emit('chat message', {
         senderSocketId: socket.id, 
         senderName: socket.nickname,
@@ -117,9 +163,9 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('❌ 使用者離線:', socket.id);
-    waitingQueue = waitingQueue.filter(u => u.socket.id !== socket.id);
+    waitingPool = waitingPool.filter(u => u.socket.id !== socket.id);
     cleanUpRoom(socket);
-  });
+  }); 
 });
 
 function cleanUpRoom(socket) {

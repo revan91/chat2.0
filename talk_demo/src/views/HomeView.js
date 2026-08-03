@@ -1,4 +1,4 @@
-// src/views/HomeView.js
+// HomeView.js
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -12,34 +12,44 @@ export function useHome() {
     selectedGender.value = gender
   }
 
-  // 點擊下一步時檢查[cite: 5]
-  const handleNext = () => {
-    // 1. 檢查性別[cite: 5]
+  // 共用驗證與儲存邏輯
+  const validateAndSave = () => {
     if (!selectedGender.value) {
       alert('請選擇您的性別！')
-      return
+      return false
     }
 
-    // 2. 檢查暱稱[cite: 5]
     if (!nickname.value.trim()) {
       alert('請輸入您的暱稱！')
-      return
+      return false
     }
 
-    console.log('👉 開始尋找配對...', nickname.value, selectedGender.value)
-
-    // 儲存性別與暱稱[cite: 5]
     localStorage.setItem('userGender', selectedGender.value)
     localStorage.setItem('userNickname', nickname.value.trim())
+    return true
+  }
 
-    // 跳轉至聊天室[cite: 5]
-    router.push('/chat')
+  // 點擊「下一步」按鈕：跳轉至一般聊天室
+  const handleNext = () => {
+    if (validateAndSave()) {
+      console.log('👉 開始尋找一般配對...', nickname.value, selectedGender.value)
+      router.push('/gender') // 跳轉至 gender.vue 頁面
+    }
+  }
+
+  // 點擊「密語配對」按鈕：跳轉至 secret.vue 頁面
+  const handleSecret = () => {
+    if (validateAndSave()) {
+      console.log('🔐 開始尋找密語配對...', nickname.value, selectedGender.value)
+      router.push('/secret')
+    }
   }
 
   return {
     selectedGender,
     nickname,
     selectGender,
-    handleNext
+    handleNext,
+    handleSecret // 🎯 傳出 handleSecret 函數
   }
 }
