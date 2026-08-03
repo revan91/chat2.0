@@ -68,7 +68,7 @@ const {
           <!-- 🎯 按鈕下方：即時顯示人數提示 -->
           <div class="match-count-info mb-4" style="min-height: 24px;">
             <p v-if="matchCount !== null" class="text-secondary small fw-bold m-0 animated fadeIn">
-              💡 當前有 <span class="text-primary fs-6">{{ matchCount }}</span> 位符合條件的使用者正在線上等待
+              💡 當前有 <span class="text-primary fs-6">{{ matchCount }}</span> 位符合條件的使用者正在等待
             </p>
             <p v-else class="text-muted small m-0">
               請點擊上方按鈕查看即時在線等待人數
