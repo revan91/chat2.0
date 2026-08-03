@@ -5,11 +5,12 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-const path = require('path');
-// 1. 如果有 Socket.io 或 HTTP 伺服器
-const server = http.createServer(app);
+
 
 // 2. 設定 API 路由（如果有）
+
+const path = require('path');
+
 app.get('/api/test', (req, res) => {
   res.json({ message: "API 連線成功！" });
 });
