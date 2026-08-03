@@ -5,28 +5,30 @@ const { Server } = require('socket.io');
 const app = express();
 const server = http.createServer(app);
 
-
-// 1. API 路由寫在前面
-
 const path = require('path');
+// 1. 如果有 Socket.io 或 HTTP 伺服器
+const server = http.createServer(app);
 
-app.get('/api/example', (req, res) => {
-    res.json({ message: "Hello from backend!" });
+// 2. 設定 API 路由（如果有）
+app.get('/api/test', (req, res) => {
+  res.json({ message: "API 連線成功！" });
 });
 
-// 2. 設定靜態檔案資料夾（指向 Vue 打包出的 dist 目錄）
-// path.join 根據你的目錄結構，從 server 目錄往上跳一層到 talk_demo/dist
+// 關鍵 3：託管 Vue 打包後的靜態檔案 (dist)
+// __dirname 代表 server 資料夾，../talk_demo/dist 可以往上退一層找到 Vue 的打包結果
 app.use(express.static(path.join(__dirname, '../talk_demo/dist')));
 
-// 3. 所有其他的 Get 請求，通通傳回 index.html（解決 Vue Router History 模式 404 問題）
+// 關鍵 4：處理 Vue Router (SPA) 的 History 模式
+// 只要不是 API 請求，其餘請求通通傳回 index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../talk_demo/dist/index.html'));
+  res.sendFile(path.join(__dirname, '../talk_demo/dist/index.html'));
 });
 
-// 4. 使用 Render 分配的 PORT 啟動服務
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+// 關鍵 5：動態使用 Render 給予的 process.env.PORT
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, () => {
+  console.log(`✅ 伺服器已在 Port ${PORT} 啟動`);
 });
 
 const io = new Server(server, {
