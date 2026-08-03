@@ -137,7 +137,3 @@ function cleanUpRoom(socket) {
     socket.roomId = null;
   }
 }
-
-server.listen(3001, () => {
-  console.log('✅ Socket 後端伺服器已在 http://localhost:3001 啟動');
-});
