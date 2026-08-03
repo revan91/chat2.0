@@ -30,7 +30,7 @@ export function useChat() {
       return
     }
 
-    const socket = io('http://localhost:3001')
+    const socket = io()
     socketRef.value = socket
 
     // 連線成功時，立刻儲存自己的 Socket ID
