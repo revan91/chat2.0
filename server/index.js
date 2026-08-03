@@ -21,7 +21,7 @@ app.use(express.static(path.join(__dirname, '../talk_demo/dist')));
 
 // 關鍵 4：處理 Vue Router (SPA) 的 History 模式
 // 只要不是 API 請求，其餘請求通通傳回 index.html
-app.get('*', (req, res) => {
+app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(__dirname, '../talk_demo/dist/index.html'));
 });
 
